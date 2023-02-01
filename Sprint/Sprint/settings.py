@@ -82,8 +82,8 @@ WSGI_APPLICATION = 'Sprint.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Sprint1',
-        'USER': 'postgres',
+        'NAME': 'sprint',
+        'USER': 'maxrainy',
         'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '5432',
