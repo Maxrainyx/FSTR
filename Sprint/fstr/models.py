@@ -5,7 +5,7 @@ from django.urls import reverse
 
 
 class PerevalAdded(models.Model):
-    """" # """
+    """" # TODO """
     name = models.CharField(max_length=100)
     date_added = models.DateTimeField(auto_now_add=True)
     raw_data = JSONField()
@@ -22,13 +22,15 @@ class PerevalAdded(models.Model):
 
 
 class PerevalAreas(models.Model):
-    """" # """
-    id_parent = ...
+    """" # TODO """
+    id_parent = ...  # TODO
     title = models.TextField(max_length=100)
 
 
 class Activities(models.Model):
     ...
+    title = models.CharField(max_length=100)
+
 
 unique = True
 
@@ -40,6 +42,14 @@ class Coords(models.Model):
 
     def __str__(self):
         return f'lat: {self.latitude}, lon: {self.longitude}, h: {self.height}'
+
+
+class PerevalImages(models.Model):
+    time_added = models.DateTimeField(auto_now_add=True)
+    img = models.B
+
+
+...
 
 
 class Post(models.Model):
