@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'fstr',
+    'fstr.apps.FstrConfig',
     'rest_framework',
 
 ]
@@ -91,6 +91,7 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '5432',
+        'DISABLE_SERVER_SIDE_CURSORS': True,
     }
 }
 
