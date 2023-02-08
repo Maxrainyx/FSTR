@@ -48,6 +48,7 @@ class Coordinates(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     height = models.IntegerField()
+    pass_id = models.ForeignKey('Pass', on_delete=models.CASCADE)
 
     def __str__(self):
         return f'lat: {self.latitude}, lon: {self.longitude}, h: {self.height}'

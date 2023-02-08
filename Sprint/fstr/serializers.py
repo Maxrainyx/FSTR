@@ -11,7 +11,6 @@ class PassAddedSerializer(serializers.HyperlinkedModelSerializer):
                   'title',
                   'other_title',
                   'connect',
-                  'coord_id',
                   'spring',
                   'summer',
                   'autumn',
@@ -19,4 +18,3 @@ class PassAddedSerializer(serializers.HyperlinkedModelSerializer):
                   'pass_images',
                   'status',
                   ]
-

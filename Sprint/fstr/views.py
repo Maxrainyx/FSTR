@@ -1,15 +1,23 @@
 from rest_framework import viewsets
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-
+from django.views.generic import DetailView
 from .serializers import PassAddedSerializer
-from .models import Pass, User, PassImages
+from .models import Pass, User
 
 
 class PassViewset(viewsets.ModelViewSet):
     queryset = Pass.objects.all()
-    serializer_class = PassAddedSerializer
+    serializer_class = PassAddedSerializer(many=True)
+
+
+class PassDDetailView(DetailView):
+    """ Generic View for a single post with its id """
+    model = Pass
+    template_name = 'pass_detail.html'
+    # The name for the Post chosen by user
+    context_object_name = 'pass_detail'
 
 
 @csrf_exempt
