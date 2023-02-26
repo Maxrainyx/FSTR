@@ -99,7 +99,8 @@
 <h4>Метод <i>GET</i> /submitData/</h4>
 Этот метод получает одну запись (перевал) по её id с выведением всей информацию об перевале, в том числе статус модерации.
 <p>Пример JSON: </p>
-```{
+```
+{
         "id": 8,
         "user": {
             "email": "mxrainy@gmail.com",
@@ -145,8 +146,7 @@
         "add_time": "2023-02-20T01:10:11",
         "status": "new"
 },```
-</code>
-<p>Примеры JSON-ответов:</p>
+Примеры JSON-ответов:
 ````{ "status": 200, "message": "Success", "id": 42 }
 { "status": 400, "message": "There's no such record", "id": null}
 ````
