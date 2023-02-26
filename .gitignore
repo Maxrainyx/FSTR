@@ -1,8 +1,5 @@
 
 .DS_Store
-.idea/.DS_Store
-.DS_Store
-.idea/sonarlint/.DS_Store
-__pycache__/settings.cpython-311
-__pycache__/urls.cpython-311
+.idea/
+__pycache__/
 main
