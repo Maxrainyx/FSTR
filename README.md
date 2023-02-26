@@ -95,13 +95,12 @@
 Примеры JSON-ответов:
 ```{ "status": 200, "message": "Success", "id": 42 }
 { "status": 400, "message": "Empty request", "id": null}
-{ "status": 500, "message": "Ошибка подключения к базе данных", "id": null}```
-
+{ "status": 500, "message": "Ошибка подключения к базе данных", "id": null}
+```
 <h4>Метод <i>GET</i> /submitData/</h4>
 Этот метод получает одну запись (перевал) по её id с выведением всей информацию об перевале, в том числе статус модерации.
 <p>Пример JSON: </p>
-
-            {
+```{
         "id": 8,
         "user": {
             "email": "mxrainy@gmail.com",
@@ -147,10 +146,12 @@
         "add_time": "2023-02-20T01:10:11",
         "status": "new"
 },
+```
 </code>
 <p>Примеры JSON-ответов:</p>
 ````{ "status": 200, "message": "Success", "id": 42 }
-{ "status": 400, "message": "There's no such record", "id": null}````
+{ "status": 400, "message": "There's no such record", "id": null}
+````
 <h4>Метод PATCH /submitData/</h4>
 Позволяет отредактировать существующую запись (замена), если она в статусе "new". При этом редактировать можно все поля, кроме ФИО, адреса почты и номера телефона.
 В качестве результата изменения приходит ответ содержащий следующие данные:
@@ -161,19 +162,11 @@ state:
 message: - сообщение об успешном редактировании при state=1 - сообщение о причине неудачного обновления записи при state=0.
 Примеры JSON-ответов:
 ```{ "status": 200, "message": "Success", "state": 1 }
-{ "status": 400, "message": "It's not a NEW status of the record", "state": 0}```
+{ "status": 400, "message": "It's not a NEW status of the record", "state": 0}
+```
 <h4>Метод <i>GET+email</i> /submitData/?user_email=email</h4>
 
 Возвращает данные всех объектов, отправленных на сервер пользователем с почтой email.
 Пример запроса:
 
 GET /submitData/?user_email=maxrainy@agmail.com
-
-
-<dl>
-  <dt>Definition list</dt>
-  <dd>Is something people use sometimes.</dd>
-
-  <dt>Markdown in HTML</dt>
-  <dd>Does *not* work **very** well. Use HTML <em>tags</em>.</dd>
-</dl>
