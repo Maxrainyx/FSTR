@@ -1,62 +1,132 @@
+from django.shortcuts import redirect
 from rest_framework import viewsets
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from django.views.generic import DetailView
-from .serializers import PassAddedSerializer
-from .models import Pass, User
+from rest_framework.response import Response
+from .models import Pass, User, Level, Coordinates, Images
+from .serializers import (
+    PassSerializer, ImagesSerializer, UserSerializer, CoordinatesSerializer, LevelSerializer
+)
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.decorators import api_view
 
 
-class PassViewset(viewsets.ModelViewSet):
-    queryset = Pass.objects.all()
-    serializer_class = PassAddedSerializer(many=True)
+def reverse_to_submit(request):
+    """ Redirects to submitData """
+    return redirect('submitData')
 
 
-class PassDDetailView(DetailView):
-    """ Generic View for a single post with its id """
-    model = Pass
-    template_name = 'pass_detail.html'
-    # The name for the Post chosen by user
-    context_object_name = 'pass_detail'
+class PassAPIView(viewsets.ViewSet):
+    """ API endpoint that allows users to look up records or edited them. """
 
+    @staticmethod
+    def serializer_error_response(errors, param='id'):
+        """ Response method for serializer errors. Method is static method."""
+        message = ''
+        for k, v in errors.items():
+            message += f'{k}: {str(*v)}'
+        if param == 'state':
+            return Response({'message': message, 'state': 0}, status=400)
+        else:
+            return Response({'message': message, 'id': None}, status=400)
 
-@csrf_exempt
-def submitData(request):
-    if request.method == 'POST':
-        json_params = json.loads(request.body)
-        _pass = Pass.objects.create(
-            date_added=json_params['date_added'],
-            title=json_params['title'],
-            bTitle=json_params['bTitle'],
-            other_title=json_params['other_title'],
-            connect=json_params['connect'],
-            coord_id=User.objects.create(
-                latitude=json_params['latitude'],
-                longitude=json_params['longitude'],
-                height=json_params['height'],
-            ),
-            spring=json_params['spring'],
-            summer=json_params['summer'],
-            autumn=json_params['autumn'],
-            winter=json_params['winter'],
-            user=User.objects.create(
-                name=json_params['name'],
-                surname=json_params['surname'],
-                email=json_params['email'],
-                mobile=json_params['mobile'],
-            ),
-            status=json_params['status'],
-        )
-        return HttpResponse(json.dumps({
-            "title": _pass.title,
-            "bTitle": _pass.bTitle,
-            "other_title": _pass.other_title,
-            "connect": _pass.connect,
-            "coord_id": _pass.coord_id,
-            "spring": _pass.spring,
-            "summer": _pass.summer,
-            "autumn": _pass.autumn,
-            "pass_images": _pass.pass_images,
-            "status": _pass.status,
-            "user": _pass.user,
-        }))
+    def create_dependence(self, serializer):
+        """ Create dependence method. """
+        if serializer.is_valid():
+            return serializer.save()
+        else:
+            return self.serializer_error_response(serializer.errors)
+
+    @swagger_auto_schema(methods=['post'], request_body=PassSerializer)
+    @api_view(['POST'])
+    def post(self, request):
+        """ Swagger auto schema for post method. """
+        try:
+            data = request.data
+            if not data:
+                return Response({'message': 'Empty request', 'id': None}, status=400)
+
+            try:
+                user = User.objects.get(email=data['user']['email'])
+                user_serializer = UserSerializer(user, data=data['user'])
+            except:
+                user_serializer = UserSerializer(data=data['user'])
+
+            try:
+                images = data['images']
+                data.pop('images')
+            except:
+                images = []
+
+            serializer = PassSerializer(data=data)
+            if serializer.is_valid():
+                try:
+                    data.pop('user')
+                    pass_new = Pass.objects.create(
+                        user=self.create_dependence(user_serializer),
+                        coords=self.create_dependence(CoordinatesSerializer(data=data.pop('coordinates'))),
+                        levels=self.create_dependence(LevelSerializer(data=data.pop('level'))),
+                        **data)
+                except Exception as e:
+                    return Response({'message': str(e), 'id': None}, status=400)
+            else:
+                return self.serializer_error_response(serializer.errors)
+
+            for image in images:
+                image['pass'] = pass_new.id
+                self.create_dependence(ImagesSerializer(data=image))
+
+            return Response({'message': 'Success', 'id': pass_new.id}, status=200)
+
+        except Exception as e:
+            return Response({'message': str(e), 'id': None}, status=500)
+
+    @swagger_auto_schema(metods=['get'], manual_parameters=[
+        openapi.Parameter('user_email', openapi.IN_QUERY, description="user e-mail", type=openapi.TYPE_STRING)])
+    def get_records_by_user(self, request, **kwargs):
+        """ Get records for the user. """
+        try:
+            user = User.objects.get(email=request.GET['user_email'])
+            passages = Pass.objects.filter(user=user)
+            data = PassSerializer(passages, many=True).data
+            return Response(data, status=200)
+        except:
+            return Response({'message': 'No records found'}, status=200)
+
+    @swagger_auto_schema(metods=['get'], request_body=PassSerializer)
+    def get_one(self, request, **kwargs):
+        """ Get one record. """
+        try:
+            pass_one = Pass.objects.get(pk=kwargs['pk'])
+            data = PassSerializer(pass_one).data
+            return Response(data, status=200)
+        except:
+            return Response({'message': "There's no such record", 'id': None}, status=400)
+
+    @swagger_auto_schema(metods=['patch'], request_body=PassSerializer)
+    def edit_one(self, request, **kwargs):
+        """ Edit one record. """
+        try:
+            pass_one = Pass.objects.get(pk=kwargs['pk'])
+            if pass_one.status == 'new':
+                data = request.data
+                data.pop('user')
+                Images.objects.filter(pereval_id=pass_one.id).delete()
+                images = data.pop('images')
+                serializers = []
+                serializers.append(CoordinatesSerializer(Coordinates.objects.get(id=pass_one.coordsinates_id),
+                                                         data=data.pop('coordinates')))
+                serializers.append(LevelSerializer(Level.objects.get(id=pass_one.levels_id), data=data.pop('level')))
+                serializers.append((PassSerializer(pass_one, data=data)))
+                for image in images:
+                    image['pass'] = pass_one.id
+                    serializers.append(ImagesSerializer(data=image))
+                for serializer in serializers:
+                    if serializer.is_valid():
+                        serializer.save()
+                    else:
+                        return self.serializer_error_response(serializer.errors, 'state')
+                return Response({'message': 'Success', 'state': 1}, status=200)
+            else:
+                return Response({'message': "It's not a new status of the record", 'state': 0}, status=400)
+        except:
+            return Response({'message': "There's no such record", 'state': 0}, status=400)

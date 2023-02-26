@@ -1,64 +1,75 @@
+
 from django.db import models
 
 
 class User(models.Model):
-    name = models.CharField(max_length=100)
-    surname = models.CharField(max_length=100)
-    email = models.EmailField()
-    mobile = models.IntegerField()
+    """ Model representing a user. """
+    name = models.CharField(max_length=50)
+    second_name = models.CharField(max_length=50)
+    otc = models.CharField(max_length=50)
+    phone = models.CharField(max_length=25)
+    email = models.EmailField(unique=True)
 
-
-STATUS = [
-    ('new', 'новое'),
-    ('pending', 'взято в работу'),
-    ('accepted', 'успешно'),
-    ('rejected', 'не принято'),
-]
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_user'
 
 
 class Pass(models.Model):
-    """" # TODO """
-    date_added = models.DateTimeField(auto_now_add=True)
-    bTitle = models.CharField(max_length=10)
-    title = models.CharField(max_length=100)
-    other_title = models.CharField(max_length=100)
-    connect = models.CharField(max_length=100)
-    coord_id = models.ForeignKey('Coordinates',
-                                 on_delete=models.CASCADE,
-                                 related_name='coord_id'
-                                 )
-    spring = models.CharField(max_length=100)
-    summer = models.CharField(max_length=100)
-    autumn = models.CharField(max_length=100)
-    winter = models.CharField(max_length=100)
-    pass_images = models.ManyToManyField('PassImages',
-                                         through='Images',)
-    status = models.CharField(max_length=255,
-                              choices=STATUS,
-                              default='new',)
+    """ Model for storing new passes """
+    ADDED_STATUS = [
+        ('new', 'новое'),
+        ('pending', 'взято в работу'),
+        ('accepted', 'успешно'),
+        ('rejected', 'не принято'),
+    ]
+
+    created = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    beauty_title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    other_titles = models.CharField(max_length=255)
+    connect = models.CharField(max_length=255, blank=True)
+    add_time = models.DateTimeField()
+    coordinates = models.ForeignKey('Coordinates', on_delete=models.CASCADE)
+    levels = models.ForeignKey('Level', blank=True, on_delete=models.PROTECT)
+    status = models.CharField(max_length=8, choices=ADDED_STATUS, default='new')
 
-
-class Activities(models.Model):
-    title = models.CharField(max_length=100)
-    pass_added = models.ManyToManyField(Pass)
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_pass'
 
 
 class Coordinates(models.Model):
+    """ Model for storing coordinates of the passes """
     latitude = models.FloatField()
     longitude = models.FloatField()
     height = models.IntegerField()
-    pass_id = models.ForeignKey('Pass', on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f'lat: {self.latitude}, lon: {self.longitude}, h: {self.height}'
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_coordinates'
 
 
-class PassImages(models.Model):
-    time_added = models.DateTimeField(auto_now_add=True)
-    img = models.BinaryField(null=True)
+class Level(models.Model):
+    """ Model for storing difficulty levels of the passes """
+    winter_level = models.CharField(max_length=3, blank=True)
+    summer_level = models.CharField(max_length=3, blank=True)
+    autumn_level = models.CharField(max_length=3, blank=True)
+    spring_level = models.CharField(max_length=3, blank=True)
+
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_level'
 
 
 class Images(models.Model):
-    pass_image = models.ForeignKey(PassImages, on_delete=models.CASCADE)
-    pass_added = models.ForeignKey(Pass, on_delete=models.CASCADE)
+    """ Model for storing images of the passes """
+    passes = models.ForeignKey(Pass, related_name='images', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=20)
+    data = models.BinaryField()
+
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_images'
