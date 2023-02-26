@@ -1,75 +1,75 @@
+
 from django.db import models
-from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
-from django.urls import reverse
 
 
-class PerevalAdded(models.Model):
-    """" # """
-    name = models.CharField(max_length=100)
-    date_added = models.DateTimeField(auto_now_add=True)
-    raw_data = JSONField()
-    images = JSONField()
-    bTitle = models.CharField(max_length=10)
-    title = models.CharField(max_length=100)
-    other_title = models.CharField(max_length=100)
-    connect = models.CharField(max_length=100)
-    coord_id = models.ForeignKey('Coords', on_delete=models.CASCADE, related_name='coord_id')
-    spring = models.CharField(max_length=100)
-    summer = models.CharField(max_length=100)
-    autumn = models.CharField(max_length=100)
-    winter = models.CharField(max_length=100)
+class User(models.Model):
+    """ Model representing a user. """
+    name = models.CharField(max_length=50)
+    second_name = models.CharField(max_length=50)
+    otc = models.CharField(max_length=50)
+    phone = models.CharField(max_length=25)
+    email = models.EmailField(unique=True)
+
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_user'
 
 
-class PerevalAreas(models.Model):
-    """" # """
-    id_parent = ...
-    title = models.TextField(max_length=100)
+class Pass(models.Model):
+    """ Model for storing new passes """
+    ADDED_STATUS = [
+        ('new', 'новое'),
+        ('pending', 'взято в работу'),
+        ('accepted', 'успешно'),
+        ('rejected', 'не принято'),
+    ]
+
+    created = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    beauty_title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    other_titles = models.CharField(max_length=255)
+    connect = models.CharField(max_length=255, blank=True)
+    add_time = models.DateTimeField()
+    coordinates = models.ForeignKey('Coordinates', on_delete=models.CASCADE)
+    levels = models.ForeignKey('Level', blank=True, on_delete=models.PROTECT)
+    status = models.CharField(max_length=8, choices=ADDED_STATUS, default='new')
+
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_pass'
 
 
-class Activities(models.Model):
-    ...
-
-unique = True
-
-
-class Coords(models.Model):
+class Coordinates(models.Model):
+    """ Model for storing coordinates of the passes """
     latitude = models.FloatField()
     longitude = models.FloatField()
     height = models.IntegerField()
 
-    def __str__(self):
-        return f'lat: {self.latitude}, lon: {self.longitude}, h: {self.height}'
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_coordinates'
 
 
-class Post(models.Model):
-    """ Post model with 'title', 'text' fields """
-    title = models.CharField(max_length=255)  # title column
-    text = RichTextUploadingField()  # text column
+class Level(models.Model):
+    """ Model for storing difficulty levels of the passes """
+    winter_level = models.CharField(max_length=3, blank=True)
+    summer_level = models.CharField(max_length=3, blank=True)
+    autumn_level = models.CharField(max_length=3, blank=True)
+    spring_level = models.CharField(max_length=3, blank=True)
+
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_level'
+
+
+class Images(models.Model):
+    """ Model for storing images of the passes """
+    passes = models.ForeignKey(Pass, related_name='images', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='post_category')  # o-t-o - Category
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_user')  # o-t-o with User
+    title = models.CharField(max_length=20)
+    data = models.BinaryField()
 
-    def __str__(self):
-        return f'{self.title}'
-
-    def get_absolute_url(self):
-        """ Method for the redirection """
-        return reverse('post_detail', args=[str(self.id)])
-
-
-class Comment(models.Model):
-    """ Comment model with 'text' fields and One-To-One relationship with the Post model """
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment_user')
-    text = models.TextField(max_length=255)  # simple text field to contain the comment
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment_post')  # o-t-o with Post
-    rating = models.IntegerField(default=0)  # rating of the comment, starts from 0 initially
-    created = models.DateTimeField(auto_now_add=True)  # time-field with automatically managed creation time
-    approved = models.BooleanField(default=False)  # to check whether comment approved by the post author or not
-
-    def __str__(self):
-        return f'{self.text}'
-
-    def get_absolute_url(self):
-        """ Method for the redirection """
-        return reverse('post_detail', args=[str(self.post_id)])
+    class Meta:
+        """ Used for a custom table name. """
+        db_table = 'pass_images'
