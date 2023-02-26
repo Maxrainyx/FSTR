@@ -150,7 +150,7 @@
         "status": "new"
 },
 </code>
-Примеры JSON-ответов:
+<p>Примеры JSON-ответов:</p>
 ````
 { "status": 200, "message": "Success", "id": 42 }
 { "status": 400, "message": "There's no such record", "id": null}
