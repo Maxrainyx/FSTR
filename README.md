@@ -41,12 +41,12 @@
 Пример JSON:
 ```JSON
 {
-    "beauty_title": "пер.",
-    "title": "Дятлова",
-    "other_titles": "седл.",
-    "connect": "0",
-    "add_time": "2023-02-20 00:13:14",
-    "user": {
+ "beauty_title": "пер.",
+ "title": "Дятлова",
+ "other_titles": "седл.",
+ "connect": "0",
+ "add_time": "2023-02-20 00:13:14",
+ "user": {
         "email": "mxrainy@gmail.com",
         "name": "Максим",
         "second_name": "Максимов",
