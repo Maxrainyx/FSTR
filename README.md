@@ -173,3 +173,12 @@ message: - сообщение об успешном редактировании
 Пример запроса:
 
 GET /submitData/?user_email=maxrainy@agmail.com
+
+
+<dl>
+  <dt>Definition list</dt>
+  <dd>Is something people use sometimes.</dd>
+
+  <dt>Markdown in HTML</dt>
+  <dd>Does *not* work **very** well. Use HTML <em>tags</em>.</dd>
+</dl>
